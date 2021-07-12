@@ -3,6 +3,7 @@ Note: All credit for the BuildTools functionality goes to SpigotMC.
 Note: All credit for the JDK's goes to AdoptOpenJDK.
 
 Spigot BuildTools Wiki: https://www.spigotmc.org/wiki/buildtools/
+
 Spigot BuildTools Download: https://www.spigotmc.org/wiki/buildtools/#running-buildtools
 
 ### What does this program do?
