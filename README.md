@@ -17,4 +17,4 @@ Running this is as simple as running BuildTools itself
 The program will loop through 1.17->1.8, downloading BuildTools and processing each version, as of BuildTools - Master Version '1.0', it is not possible to specify which versions you'd like to have processed, but I am open to Pull-Requests.
 
 ### Important Information
-This project will download BuildTools, JDK 16 and JDK 8 from their respective download links. I do not own any of these projects and am therefore not liable to assist in bugs which happen with them. I do not claim ownership of any of these projects and I am willing to remove this project if it breaks any form of copyright or usage policy.
+This project will download BuildTools, JDK 17, JDK 16 and JDK 8 from their respective download links. I do not own any of these projects and am therefore not liable to assist in bugs which happen with them. I do not claim ownership of any of these projects and I am willing to remove this project if it breaks any form of copyright or usage policy.
