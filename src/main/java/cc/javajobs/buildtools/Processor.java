@@ -125,12 +125,12 @@ public class Processor {
     @Nullable
     private File locateJDKExecutable(@NotNull String url, @NotNull String name) throws InterruptedException {
         Main.log("Downloading JDK " + name + ".");
-        final File jdk16 = attemptJDKDownload(url, name);
-        if (jdk16 == null) return null;
+        final File jdk = attemptJDKDownload(url, name);
+        if (jdk == null) return null;
         Thread.sleep(3000);
-        if (!extractJDKZip(jdk16)) return null;
+        if (!extractJDKZip(jdk)) return null;
         Thread.sleep(1000);
-        return resolveExecutable(jdk16.getParentFile(), jdk16);
+        return resolveExecutable(jdk.getParentFile(), jdk);
     }
 
     /**
