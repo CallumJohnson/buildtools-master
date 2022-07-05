@@ -31,6 +31,11 @@ public class Processor {
     private static final String BUILDTOOLS_LOCATION = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar";
 
     /**
+     * The download for the JDK_17
+     */
+    private static final String JDK_17_DOWNLOAD = "https://github.com/AdoptOpenJDK/openjdk17-binaries/releases/download/jdk-2021-05-07-13-31/OpenJDK-jdk_x64_windows_hotspot_2021-05-06-23-30.zip";
+
+    /**
      * The download for the JDK_16
      */
     private static final String JDK_16_DOWNLOAD = "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_x64_windows_hotspot_16.0.1_9.zip";
@@ -59,6 +64,8 @@ public class Processor {
         final File buildTools = attemptDownloadBuildTools();
         if (buildTools == null) return;
         Thread.sleep(3000);
+        final File jdk17exe = locateJDKExecutable(JDK_17_DOWNLOAD, "17");
+        if (jdk17exe == null) return;
         final File jdk16exe = locateJDKExecutable(JDK_16_DOWNLOAD, "16");
         if (jdk16exe == null) return;
         Thread.sleep(3000);
@@ -81,7 +88,9 @@ public class Processor {
                 }
             }
             final BuildToolsThread thread;
-            if (value.getJavaVersionRequired().equals(JavaVersion.JAVA_16)) {
+            if(value.getJavaVersionRequired().equals(JavaVersion.JAVA_17)) {
+                thread = new BuildToolsThread(jdk17exe, version, versionFolder, versionSpecificBuildTools);
+            } else if (value.getJavaVersionRequired().equals(JavaVersion.JAVA_16)) {
                 thread = new BuildToolsThread(jdk16exe, version, versionFolder, versionSpecificBuildTools);
             } else {
                 thread = new BuildToolsThread(jdk8exe, version, versionFolder, versionSpecificBuildTools);
