@@ -2,6 +2,11 @@ package cc.javajobs.buildtools;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * With thanks to:
  *  - SpigotMC for BuildTools.
@@ -12,7 +17,10 @@ import org.jetbrains.annotations.NotNull;
  * @since 11/07/2021 - 09:16
  */
 public class Main {
+    public static String[] args;
+    static Processor processor = new Processor();
 
+    public static boolean debug = false;
     /**
      * Main method to run the program.
      * <p>
@@ -21,8 +29,9 @@ public class Main {
      * @param args of the execution.
      */
     public static void main(String[] args) throws InterruptedException {
-        Processor processor = new Processor();
-        processor.start();
+        Main.args = args;
+        processor.checkArgs();
+        processor.done();
     }
 
     /**
@@ -46,5 +55,20 @@ public class Main {
         if (message.isEmpty()) throw new IllegalArgumentException("Message cannot be blank");
         System.out.println("[ERROR] " + message);
     }
+
+    /**
+     * Method to log the message to the console with the [DEBUG] prefix.
+     *
+     * @param message to log.
+     * @throws IllegalArgumentException if the message is blank.
+     */
+    public static void debug(@NotNull String message) {
+        if(debug) {
+            System.out.println("[DEBUG] " + message);
+        }
+    }
+
+    //create folder function
+
 
 }
