@@ -14,6 +14,30 @@ import org.jetbrains.annotations.NotNull;
 public enum SpigotVersion {
 
     /**
+     * NMS Version: 1_19_R1
+     * Bukkit Version: 1.19-R0.1-SNAPSHOT
+     */
+    Spigot_1_19(JavaVersion.JAVA_17),
+
+    /**
+     * NMS Version: 1_18_R3
+     * Bukkit Version: 1.18.2-R0.1-SNAPSHOT
+     */
+    Spigot_1_18_2(JavaVersion.JAVA_17),
+
+    /**
+     * NMS Version: 1_18_R2
+     * Bukkit Version: 1.18.1-R0.1-SNAPSHOT
+     */
+    Spigot_1_18_1(JavaVersion.JAVA_17),
+
+    /**
+     * NMS Version: 1_18_R1
+     * Bukkit Version: 1.18-R0.1-SNAPSHOT
+     */
+    Spigot_1_18(JavaVersion.JAVA_17),
+
+    /**
      * NMS Version: 1_17_R1
      * Bukkit Version: 1.17-R0.1-SNAPSHOT
      */

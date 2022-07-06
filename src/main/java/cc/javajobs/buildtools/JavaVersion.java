@@ -12,6 +12,16 @@ package cc.javajobs.buildtools;
 public enum JavaVersion {
 
     /**
+     * Java 18 - JDK 18
+     */
+    JAVA_18(62),
+
+    /**
+     * Java 17 - JDK 17
+     */
+    JAVA_17(61),
+
+    /**
      * Java 16 - JDK 16
      */
     JAVA_16(60),
