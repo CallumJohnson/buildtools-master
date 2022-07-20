@@ -8,10 +8,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static cc.javajobs.buildtools.Main.args;
 
 /**
  * The Processor class handles all of the Program's functionality.
@@ -24,6 +31,21 @@ import java.util.concurrent.TimeUnit;
  * @since 11/07/2021 - 09:17
  */
 public class Processor {
+
+    /**
+     * To check if it should move the nms server api to a separate folder.
+     */
+    private static boolean overwriteFiles = true;
+
+    /**
+     * To check if it should move the nms server api to a separate folder.
+     */
+    private static boolean nmsApiMove = false;
+
+    /**
+     * To check if it should move the servers to a separate folder.
+     */
+    private static boolean serverMove = false;
 
     /**
      * The download for BuildTools.
@@ -58,6 +80,7 @@ public class Processor {
         Main.log(" | |_) | |_| | | | (_| |  | | (_) | (_) | \\__ \\");
         Main.log(" |____/ \\__,_|_|_|\\__,_|  |_|\\___/ \\___/|_|___/");
         Main.log("                                               ");
+        checkArgs();
         Thread.sleep(3000);
         Main.log("'BuildTools - Master' is now processing, downloading the most up-to-date BuildTools Jar.");
         Thread.sleep(5000);
@@ -107,6 +130,7 @@ public class Processor {
                 Main.log("Took " + TimeUnit.MILLISECONDS.toMinutes(diff) + " minutes to compile " + producedFile.getName());
             }
         }
+        done();
     }
 
     /**
@@ -131,6 +155,147 @@ public class Processor {
         if (!extractJDKZip(jdk)) return null;
         Thread.sleep(1000);
         return resolveExecutable(jdk.getParentFile(), jdk);
+    }
+
+    /**
+     * Checks the argument for arguments that have uses and creates what is needed before they are accessed after the program is done.
+     */
+    public void checkArgs() {
+        List<String> argsList = Arrays.asList(args);
+        for(String arg : args) {
+            //Checks if the args contains the '-s' or '-server' flag.
+            if(arg.equalsIgnoreCase("-server") || arg.equalsIgnoreCase("-s") || arg.equalsIgnoreCase("-servers")) {
+                serverMove = true;
+                //turn main.args into a list.
+                checkFolder(argsList, arg, "Servers");
+            }
+            if(arg.equalsIgnoreCase("-nms") || arg.equalsIgnoreCase("-n")) {
+                nmsApiMove = true;
+                //turn main.args into a list.
+                checkFolder(argsList, arg, "nmsSpigotApi");
+            }
+            if(arg.equalsIgnoreCase("-keep") || arg.equalsIgnoreCase("-k")) {
+                overwriteFiles = false;
+            }
+            if(arg.equalsIgnoreCase("-d") || arg.equalsIgnoreCase("-debug")) {
+                Main.debug = true;
+            }
+        }
+    }
+
+    /**
+     * Check if the next argument is a folder. If not or it doesn't exist, it will create a new folder from the defaultPathName Variable.
+     */
+    private void checkFolder(List<String> argsList, String arg, String defaultPathName) {
+        boolean tryCatch;
+        tryCatch = false;
+        try {
+            tryCatch = argsList.get(argsList.indexOf(arg) + 1).startsWith("-");
+        } catch (IndexOutOfBoundsException ignored) {
+        }
+        if(tryCatch) {
+            createFolder("./" + defaultPathName);
+        } else {
+            try {
+                createFolder("./" + argsList.get(argsList.indexOf(arg) + 1));
+            } catch (IndexOutOfBoundsException e) {
+                createFolder("./" + defaultPathName);
+            }
+        }
+
+    }
+
+    private ArrayList<File> listFoldersForFolder(final File folder) {
+        ArrayList<File> directories = new ArrayList<>();
+        for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
+            if (fileEntry.isDirectory()) {
+                directories.add(fileEntry);
+            }
+        }
+        return directories;
+    }
+
+    private ArrayList<File> listFilesForFolder(final File folder) {
+        ArrayList<File> files = new ArrayList<>();
+        try {
+            Objects.requireNonNull(folder.listFiles());
+        } catch (NullPointerException e) {
+            return files;
+        }
+        for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
+            if (fileEntry.isDirectory()) {
+                listFilesForFolder(fileEntry);
+            } else {
+                files.add(fileEntry);
+            }
+        }
+        return files;
+    }
+
+    private void copyFile(Path source, Path dest) throws IOException {
+        if(overwriteFiles) {
+            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
+            Main.log("Copied " + source.getFileName().toString() + " to " + dest.getFileName().toString());
+        } else {
+            if(Files.exists(dest)) {
+                Main.debug("Skipping " + dest.getFileName().toString() + " because it already exists.");
+            } else {
+                Files.copy(source, dest);
+                Main.log("Copied " + source.getFileName().toString() + " to " + dest.getFileName().toString());
+            }
+        }
+    }
+    private void createFolder(@NotNull String path) {
+        if (path.isEmpty()) throw new IllegalArgumentException("Path cannot be blank");
+        final File file = new File(path);
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                Main.error("Failed to create the parent directory for the program.");
+            }
+        } else Main.debug("Parent folder " + path + " already exists.");
+    }
+
+    /**
+     * Called when the program finishes running. Used for program args
+     *
+     */
+    public void done() {
+        ArrayList<File> folders = listFoldersForFolder(new File("./BuildTools"));
+        //using lambda to call the method when the program finishes.
+        if(serverMove) {
+            folders.forEach(folder -> {
+                ArrayList<File> files = listFilesForFolder(folder);
+                files.forEach(file -> {
+                        if(file.getName().equals("spigot-" + folder.getName() + ".jar")) {
+                            try {
+                                Main.log("Moving " + file.getName() + " to " + new File("./Servers").getPath());
+                                copyFile(file.toPath(), new File("./Servers/" + file.getName()).toPath());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                });
+            });
+        }
+        if(nmsApiMove) {
+            folders.forEach(folder -> {
+                ArrayList<File> target = listFilesForFolder(new File(folder.getPath() + "/Spigot/Spigot-Server/target"));
+                target.forEach(
+                        file -> {
+                            if(file.getName().endsWith(".jar")) {
+                                if(file.getName().startsWith("spigot-") && !file.getName().endsWith("-bootstrap.jar") && !file.getName().endsWith("-remapped.jar")) {
+                                    try {
+                                        Main.log("Moving " + file.getName() + " to " + new File("./nmsSpigotApi").getPath());
+                                        copyFile(file.toPath(), new File("./nmsSpigotApi/" + file.getName()).toPath());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                );
+            });
+        }
     }
 
     /**
@@ -174,7 +339,7 @@ public class Processor {
                 return null;
             }
         }
-        Main.log("Found the folder:\t" + file.getAbsolutePath());
+        Main.debug("Found the folder:\t" + file.getAbsolutePath());
         return file;
     }
 
@@ -238,7 +403,7 @@ public class Processor {
      * Method to extract the Zip file.
      * <p>
      *     This method uses <em>Zip4J</em> to unzip the given Zip-File.
-     *     <br>Credit: https://github.com/srikanth-lingala/zip4j
+     *     <br>Credit: <a href="https://github.com/srikanth-lingala/zip4j">...</a>
      *     <br>If the zip has already been unzipped, then the process doesn't unzip it again.
      * </p>
      *
@@ -314,7 +479,7 @@ public class Processor {
                     return null;
                 }
             }
-            Files.copy(buildTools.toPath(), versionBuildTools.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(buildTools.toPath(), versionBuildTools.toPath());
             return versionBuildTools;
         } catch (IOException e) {
             Main.error("Experienced an " + e.getClass().getSimpleName() + " during version execution.");
