@@ -1,5 +1,6 @@
-package cc.javajobs.buildtools;
+package cc.javajobs.buildtools.utils;
 
+import cc.javajobs.buildtools.Main;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

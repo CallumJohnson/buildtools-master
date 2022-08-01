@@ -1,9 +1,9 @@
-package cc.javajobs.buildtools;
+package cc.javajobs.buildtools.obj;
 
 /**
  * An index of Java version names to their respective class versions.
  * <p>
- *     Thanks to: https://en.wikipedia.org/wiki/Java_class_file#General_layout
+ *     Thanks to: <a href="https://en.wikipedia.org/wiki/Java_class_file#General_layout">Wikipedia</a>
  * </p>
  *
  * @author Callum Johnson
@@ -93,6 +93,21 @@ public enum JavaVersion {
      */
     public int getVersionIndex() {
         return versionIndex;
+    }
+
+    /**
+     * Method to obtain JavaVersion by its represented index.
+     *
+     * @param index to search for.
+     * @return JavaVersion (defaults to JDK 8).
+     */
+    public static JavaVersion getByIndex(int index) {
+        for (JavaVersion value : JavaVersion.values()) {
+            if (value.getVersionIndex() == index) {
+                return value;
+            }
+        }
+        return JavaVersion.JAVA_8;
     }
 
 }
